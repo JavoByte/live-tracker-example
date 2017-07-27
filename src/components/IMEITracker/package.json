@@ -1,0 +1,6 @@
+{
+  "name": "IMEITracker",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./IMEITracker.jsx"
+}
