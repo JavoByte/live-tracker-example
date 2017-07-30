@@ -5,7 +5,10 @@ class IMEITracker extends React.Component {
 
   static propTypes = {
     imei: PropTypes.string.isRequired,
-    trackerEndpoint: PropTypes.string.isRequired,
+    socketCluster: PropTypes.shape({
+      subscribe: PropTypes.func.isRequired,
+    }),
+    onLocationUpdate: PropTypes.func,
   };
   
   state = {
@@ -14,38 +17,21 @@ class IMEITracker extends React.Component {
   };
 
   componentWillMount() {
-    let { trackerEndpoint, imei } = this.props;
-    if(!trackerEndpoint.endsWith('/')) {
-      trackerEndpoint = `${trackerEndpoint}/`;
-    }
-    const eventSource = new EventSource(`${trackerEndpoint}${imei}`);
-    eventSource.addEventListener('message', (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        this.setState(prevState => ({
-          data: [...prevState.data, data],
-        }));
-      } catch (error) {
-
+    let { imei } = this.props;
+    const channel = this.props.socketCluster.subscribe(imei);
+    channel.watch((data) => {
+      console.log('Received data from channel', imei, data);
+      this.setState(prevState => ({
+        data: [data, ...prevState.data].splice(0, 5),
+      }));
+      if (this.props.onLocationUpdate) {
+        this.props.onLocationUpdate(data);
       }
     });
-    eventSource.addEventListener('close', () => {
-      this.setState({
-        connected: false,
-      });
-    });
-
-    eventSource.addEventListener('open', () => {
-      this.setState({
-        connected: true,
-      });
-    });
-
-    this.eventSource = eventSource;
   }
 
   componentWillUnmount() {
-    this.eventSource.close();
+    this.channel.unsubscribe();
   }
 
   render() {

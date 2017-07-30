@@ -22,3 +22,19 @@
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+
+.map-container {
+  display: flex;
+  position: relative;
+  width: 100%;
+  height: 600px;
+}
+
+.marker {
+  width: 30px;
+  height: 30px;
+  background: #c32;
+  box-shadow: #333 3px 3px 10px;
+  border-radius: 30px;
+}
